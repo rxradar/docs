@@ -1,0 +1,114 @@
+---
+title: "Compare Snapshots"
+api: "GET /v1/snapshots/compare"
+description: "Compare product data across every store"
+---
+
+<ParamField query="gtin" type="string" required>
+  EAN code of the product to compare
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.rxradar.xyz/v1/snapshots/compare?gtin=3401351277399" \
+  -H "Authorization: Bearer rx_YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "gtin": "3401351277399",
+  "product_name": "Cooling Leg Circulation Gel 125 ml",
+  "stats": {
+    "min_price": 12.50,
+    "max_price": 14.99,
+    "avg_price": 13.20,
+    "snapshot_count": 4
+  },
+  "data": [
+    {
+      "id": 5638,
+      "product_id": 29,
+      "collected_at": "2026-04-29T17:34:54",
+      "price": {
+        "current": 12.95,
+        "original": 14.50,
+        "valid_until": "2026-05-15",
+        "range": null,
+        "has_promo": true,
+        "currency": "USD"
+      },
+      "per_unit": {
+        "price": 10.36,
+        "unit": "100 ml"
+      },
+      "stock": {
+        "available": true,
+        "label": "In stock"
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 28
+      },
+      "positions": [
+        { "category": "Facial Cleansers", "rank": 12, "page": 1, "page_size": 30 },
+        { "category": "Skincare", "rank": 40, "page": 2, "page_size": 30 }
+      ],
+      "promotions": [
+        {
+          "type": "bogo",
+          "source_type": "BuyOneGetOne50",
+          "title": "Spring Sale",
+          "text": "Buy 1, Get 1 50% off",
+          "terms": "Add two items to cart. While supplies last.",
+          "code": null,
+          "external_id": "promo-4827",
+          "url": "https://store-a.com/promo/4827",
+          "value": 50,
+          "value_type": "percent",
+          "min_quantity": 2,
+          "min_amount": null,
+          "scope": "online_only",
+          "valid_from": "2026-04-25",
+          "valid_until": "2026-05-15",
+          "requires_loyalty": false
+        }
+      ],
+      "badges": ["new"],
+      "favorites_count": 342,
+      "network": "network-a",
+      "store": "store-a.com"
+    },
+    {
+      "id": 8821,
+      "product_id": 412,
+      "collected_at": "2026-04-29T11:18:09",
+      "price": {
+        "current": 13.50,
+        "original": null,
+        "valid_until": null,
+        "range": null,
+        "has_promo": false,
+        "currency": "USD"
+      },
+      "per_unit": null,
+      "stock": {
+        "available": true,
+        "label": "In stock"
+      },
+      "rating": {
+        "value": 4.4,
+        "count": 17
+      },
+      "positions": [],
+      "promotions": [],
+      "badges": [],
+      "favorites_count": null,
+      "network": "network-b",
+      "store": "store-b.com"
+    }
+  ]
+}
+```
+</ResponseExample>

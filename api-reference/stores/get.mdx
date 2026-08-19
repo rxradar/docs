@@ -1,0 +1,31 @@
+---
+title: "Get Store"
+api: "GET /v1/stores/{store_id}"
+description: "Details for a specific store"
+---
+
+<ParamField path="store_id" type="integer" required>
+  Store ID
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.rxradar.xyz/v1/stores/1" \
+  -H "Authorization: Bearer rx_YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": 1,
+  "url": "https://www.cvs.com",
+  "slug": "www-cvs-com",
+  "network": "cvs",
+  "has_shop": true,
+  "has_rx": false,
+  "categories_count": 877,
+  "last_collected_at": "2026-04-29T17:34:54"
+}
+```
+</ResponseExample>

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "RxRadar",
+  "colors": {
+    "primary": "#09b880",
+    "light": "#00d693",
+    "dark": "#059669"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Use Cases",
+            "pages": [
+              "use-cases/price-benchmark",
+              "use-cases/promotion-tracking",
+              "use-cases/stock-monitoring",
+              "use-cases/digital-shelf",
+              "use-cases/distribution-monitoring",
+              "use-cases/reputation-monitoring"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "API Reference",
+            "pages": [
+              "api-reference/introduction",
+              {
+                "group": "Networks",
+                "pages": [
+                  "api-reference/networks/list",
+                  "api-reference/networks/get",
+                  "api-reference/networks/stores"
+                ]
+              },
+              {
+                "group": "Stores",
+                "pages": [
+                  "api-reference/stores/list",
+                  "api-reference/stores/get"
+                ]
+              },
+              {
+                "group": "Products",
+                "pages": [
+                  "api-reference/products/list",
+                  "api-reference/products/by-gtin",
+                  "api-reference/products/get",
+                  "api-reference/products/reviews",
+                  "api-reference/products/variants",
+                  "api-reference/products/snapshots"
+                ]
+              },
+              {
+                "group": "Snapshots",
+                "pages": [
+                  "api-reference/snapshots/list",
+                  "api-reference/snapshots/compare"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Website",
+          "href": "https://rxradar.xyz",
+          "icon": "globe"
+        },
+        {
+          "anchor": "Playground",
+          "href": "https://rxradar.xyz/api#playground",
+          "icon": "play"
+        },
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/rxradar",
+          "icon": "github"
+        },
+        {
+          "anchor": "Changelog",
+          "href": "https://rxradar.xyz/changelog",
+          "icon": "list"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:contact@rxradar.xyz"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Request access",
+      "href": "https://rxradar.xyz/#request-access"
+    }
+  },
+  "footer": {
+    "socials": {
+      "linkedin": "https://www.linkedin.com/company/rxradar"
+    }
+  }
+}

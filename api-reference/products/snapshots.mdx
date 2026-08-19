@@ -1,0 +1,179 @@
+---
+title: "List Product Snapshots"
+api: "GET /v1/products/{product_id}/snapshots"
+description: "Historical data collected for a product"
+---
+
+<ParamField path="product_id" type="integer" required>
+  Product ID
+</ParamField>
+
+<ParamField query="days" type="integer" default="30">
+  Number of days of history (max: 90)
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="50">
+  Results per page (max: 100)
+</ParamField>
+
+## Description
+
+Returns the full snapshot history for a product. Each snapshot contains the structured data collected: price, stock, rating, per-category positions and promotions.
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.rxradar.xyz/v1/products/29/snapshots?days=30" \
+  -H "Authorization: Bearer rx_YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.rxradar.xyz/v1/products/29/snapshots",
+    headers={"Authorization": "Bearer rx_YOUR_API_KEY"},
+    params={"days": 30, "per_page": 10}
+)
+
+data = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "product_id": 29,
+  "days": 30,
+  "data": [
+    {
+      "id": 5638,
+      "collected_at": "2026-04-29T17:34:54",
+      "price": {
+        "current": 12.95,
+        "original": 14.50,
+        "valid_until": "2026-05-15",
+        "range": null,
+        "has_promo": true,
+        "currency": "USD"
+      },
+      "per_unit": {
+        "price": 10.36,
+        "unit": "100 ml"
+      },
+      "stock": {
+        "available": true,
+        "label": "In stock"
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 28
+      },
+      "positions": [
+        { "category": "Facial Cleansers", "rank": 12, "page": 1, "page_size": 30 },
+        { "category": "Skincare", "rank": 40, "page": 2, "page_size": 30 }
+      ],
+      "promotions": [
+        {
+          "type": "bogo",
+          "source_type": "BuyOneGetOne50",
+          "title": "Spring Sale",
+          "text": "Buy 1, Get 1 50% off",
+          "terms": "Add two items to cart. While supplies last.",
+          "code": null,
+          "external_id": "promo-4827",
+          "url": "https://store-a.com/promo/4827",
+          "value": 50,
+          "value_type": "percent",
+          "min_quantity": 2,
+          "min_amount": null,
+          "scope": "online_only",
+          "valid_from": "2026-04-25",
+          "valid_until": "2026-05-15",
+          "requires_loyalty": false
+        }
+      ],
+      "badges": ["new"],
+      "favorites_count": 342,
+      "network": "cvs",
+      "store": "cvs.com"
+    }
+  ],
+  "total": 4,
+  "page": 1,
+  "per_page": 50,
+  "pages": 1
+}
+```
+</ResponseExample>
+
+## Object structure
+
+### price
+| Field | Type | Description |
+|-------|------|-------------|
+| `current` | float | Current shelf price |
+| `original` | float | Strikethrough price (before discount), if any |
+| `valid_until` | date | Date the current price is guaranteed until |
+| `range` | string | Price range (when the product has variants) |
+| `has_promo` | boolean | Whether at least one promotion is active |
+| `currency` | string | ISO currency code (USD, ILS, ...) |
+
+### per_unit
+| Field | Type | Description |
+|-------|------|-------------|
+| `price` | float | Comparable unit price (e.g. price per 100 ml) |
+| `unit` | string | Reference quantity the unit price is based on (e.g. `100 ml`) |
+
+### stock
+| Field | Type | Description |
+|-------|------|-------------|
+| `available` | boolean | In stock |
+| `label` | string | Availability label |
+
+### rating
+| Field | Type | Description |
+|-------|------|-------------|
+| `value` | float | Average rating |
+| `count` | integer | Review count |
+
+### positions
+Array of the product's position within each category it appears in for the period (empty if none). One object per category:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `category` | string | Category name |
+| `rank` | integer | Position within the category listing |
+| `page` | integer | Page number |
+| `page_size` | integer | Products per page |
+
+### promotions
+A list — a product can carry several promotions at once. Each item:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Normalized kind: `bogo`, `coupon`, `bundle`, `loyalty`, `percent_off`, `amount_off`, `gift`, `free_delivery`, `other` |
+| `source_type` | string | Raw promotion type as published by the store |
+| `title` | string | Promotion title |
+| `text` | string | Human-readable offer text ("Buy 1, Get 1 50% off") |
+| `terms` | string | Conditions / fine print |
+| `code` | string | Coupon code, if any |
+| `external_id` | string | Store-side promotion identifier |
+| `url` | string | Link to the promotion page, if any |
+| `value` | float | Discount magnitude (e.g. `50`) |
+| `value_type` | string | Unit of `value`: `percent`, `amount`, `price` (resulting member price), `points` (loyalty points) or `quantity` (units offered free on a buy-N-get-M deal, with `min_quantity` = N) |
+| `min_quantity` | integer | Minimum quantity to qualify |
+| `min_amount` | float | Minimum spend to qualify |
+| `scope` | string | Where the offer applies: `online_only`, `in_store` or `all` |
+| `valid_from` | date | Start date |
+| `valid_until` | date | End date |
+| `requires_loyalty` | boolean | Whether a loyalty membership is required |
+
+### badges
+List of normalized flags on the product (e.g. `new`, `exclusive`, `otc`, `marketplace`).
+
+### favorites_count
+Integer — how many shoppers have added the product to their wishlist (when the store exposes it).

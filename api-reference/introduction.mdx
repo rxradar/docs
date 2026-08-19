@@ -1,0 +1,71 @@
+---
+title: API Reference
+description: "Technical documentation for the RxRadar API"
+---
+
+## Base URL
+
+```
+https://api.rxradar.xyz
+```
+
+## Authentication
+
+All requests require an API key in the `Authorization` header:
+
+```bash
+Authorization: Bearer rx_YOUR_API_KEY
+```
+
+## Response format
+
+All responses are JSON.
+
+### Paginated response
+
+```json
+{
+  "data": [...],
+  "total": 1234,
+  "page": 1,
+  "per_page": 50,
+  "pages": 25
+}
+```
+
+### Error response
+
+```json
+{
+  "detail": "Error description"
+}
+```
+
+## HTTP status codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 400 | Bad request |
+| 401 | Unauthenticated |
+| 403 | Forbidden |
+| 404 | Not found |
+| 429 | Rate limit exceeded |
+| 500 | Server error |
+
+## Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Networks" icon="building" href="/api-reference/networks/list">
+    Online pharmacy networks
+  </Card>
+  <Card title="Stores" icon="globe" href="/api-reference/stores/list">
+    Individual sites
+  </Card>
+  <Card title="Products" icon="pills" href="/api-reference/products/list">
+    Product catalog
+  </Card>
+  <Card title="Snapshots" icon="camera" href="/api-reference/snapshots/list">
+    Prices and history
+  </Card>
+</CardGroup>

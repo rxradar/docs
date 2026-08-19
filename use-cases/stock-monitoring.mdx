@@ -1,0 +1,116 @@
+---
+title: Stock monitoring
+description: "Track product availability across online pharmacies"
+icon: "boxes-stacked"
+---
+
+## Use case
+
+Stock monitoring lets you:
+- Detect stock-outs
+- Get alerted to distribution problems
+- Optimize the supply chain
+
+## Implementation
+
+### 1. Check product availability
+
+```python
+import requests
+
+API_KEY = "rx_YOUR_API_KEY"
+EAN = "3401351277399"
+
+response = requests.get(
+    f"https://api.rxradar.xyz/v1/snapshots/compare?gtin={EAN}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+
+data = response.json()
+
+available = [s for s in data["data"] if s["stock"]["available"]]
+unavailable = [s for s in data["data"] if not s["stock"]["available"]]
+
+print(f"Available on {len(available)} stores")
+print(f"Unavailable on {len(unavailable)} stores")
+```
+
+### 2. Stock-out alerts
+
+```python
+def check_stock_alerts(ean_list, threshold=0.5):
+    """Alert if a product is unavailable on more than X% of stores"""
+    alerts = []
+
+    for gtin in ean_list:
+        response = requests.get(
+            f"https://api.rxradar.xyz/v1/snapshots/compare?gtin={gtin}",
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        data = response.json()
+
+        total = len(data["data"])
+        available = sum(1 for s in data["data"] if s["stock"]["available"])
+        rate = available / total if total > 0 else 0
+
+        if rate < threshold:
+            alerts.append({
+                "gtin": gtin,
+                "product": data["product_name"],
+                "availability_rate": f"{rate*100:.1f}%",
+                "available_stores": available,
+                "total_stores": total
+            })
+
+    return alerts
+
+# Check alerts
+alerts = check_stock_alerts(["3401351277399", "3540550014944"])
+for alert in alerts:
+    print(f"⚠️ {alert['product']}: {alert['availability_rate']} available")
+```
+
+### 3. Availability report by store
+
+```python
+def availability_by_store(gtin):
+    """Analyze availability by store for a product"""
+    response = requests.get(
+        f"https://api.rxradar.xyz/v1/snapshots/compare?gtin={gtin}",
+        headers={"Authorization": f"Bearer {API_KEY}"}
+    )
+    data = response.json()
+
+    store_status = {}
+    for snapshot in data["data"]:
+        store_status[snapshot["store"]] = {
+            "available": snapshot["stock"]["available"],
+            "price": snapshot["price"]["current"],
+            "collected_at": snapshot["collected_at"]
+        }
+
+    return store_status
+
+# Example
+status = availability_by_store("3401351277399")
+for store, info in status.items():
+    emoji = "✅" if info["available"] else "❌"
+    print(f"{emoji} {store}: ${info['price']}")
+```
+
+## Endpoints used
+
+<CardGroup cols={2}>
+  <Card
+    title="GET /v1/snapshots/compare"
+    href="/api-reference/snapshots/compare"
+  >
+    Multi-store availability
+  </Card>
+  <Card
+    title="GET /v1/products/{id}"
+    href="/api-reference/products/get"
+  >
+    Product details with availability
+  </Card>
+</CardGroup>

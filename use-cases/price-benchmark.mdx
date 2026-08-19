@@ -1,0 +1,105 @@
+---
+title: Price benchmark
+description: "Benchmark your prices against the competition"
+icon: "chart-line"
+---
+
+## Use case
+
+Price benchmarking lets brands and distributors:
+- Compare their prices against competitors
+- Spot positioning opportunities
+- Track price evolution over time
+
+## Implementation
+
+### 1. Compare prices for a product
+
+Use the `/v1/snapshots/compare` endpoint with the product EAN:
+
+```python
+import requests
+
+API_KEY = "rx_YOUR_API_KEY"
+EAN = "3401351277399"
+
+response = requests.get(
+    f"https://api.rxradar.xyz/v1/snapshots/compare?gtin={EAN}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+
+data = response.json()
+
+print(f"Product: {data['product_name']}")
+print(f"Min price: ${data['stats']['min_price']}")
+print(f"Max price: ${data['stats']['max_price']}")
+print(f"Average price: ${data['stats']['avg_price']}")
+print(f"Store count: {data['stats']['snapshot_count']}")
+```
+
+### 2. Track price evolution
+
+Use `/v1/products/{id}/snapshots` for historical data:
+
+```python
+product_id = 12345
+
+response = requests.get(
+    f"https://api.rxradar.xyz/v1/products/{product_id}/snapshots?days=30",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+
+snapshots = response.json()["data"]
+
+for snapshot in snapshots:
+    print(f"{snapshot['collected_at']}: ${snapshot['price']['current']}")
+```
+
+### 3. Build a benchmark report
+
+```python
+import pandas as pd
+
+def benchmark_report(ean_list):
+    results = []
+
+    for gtin in ean_list:
+        response = requests.get(
+            f"https://api.rxradar.xyz/v1/snapshots/compare?gtin={gtin}",
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        data = response.json()
+
+        results.append({
+            "gtin": gtin,
+            "product": data["product_name"],
+            "min_price": data["stats"]["min_price"],
+            "max_price": data["stats"]["max_price"],
+            "avg_price": data["stats"]["avg_price"],
+            "stores": data["stats"]["snapshot_count"]
+        })
+
+    return pd.DataFrame(results)
+
+# Example
+eans = ["3401351277399", "3540550014944", "0020714002527"]
+report = benchmark_report(eans)
+print(report)
+```
+
+## Endpoints used
+
+<CardGroup cols={2}>
+  <Card
+    title="GET /v1/snapshots/compare"
+    href="/api-reference/snapshots/compare"
+  >
+    Compare prices for a product
+  </Card>
+  <Card
+    title="GET /v1/products/{id}/snapshots"
+    href="/api-reference/products/snapshots"
+  >
+    Price history
+  </Card>
+</CardGroup>

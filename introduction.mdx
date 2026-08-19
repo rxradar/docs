@@ -1,0 +1,87 @@
+---
+title: Introduction
+description: "Online pharmacy data API"
+---
+
+<CardGroup cols={2}>
+  <Card
+    title="Playground"
+    icon="play"
+    href="https://rxradar.xyz/api#playground"
+  >
+    Try the API without writing code
+  </Card>
+  <Card
+    title="API key"
+    icon="key"
+    href="/quickstart"
+  >
+    Get your key and start
+  </Card>
+</CardGroup>
+
+# Welcome to RxRadar
+
+RxRadar is an online pharmacy data API. Access prices, stock, promotions, ratings and competitive data across online pharmacies — structured, through one API.
+
+## What you can do
+
+<CardGroup cols={2}>
+  <Card
+    title="Price benchmark"
+    icon="chart-line"
+    href="/use-cases/price-benchmark"
+  >
+    Position your prices against competitors
+  </Card>
+  <Card
+    title="Promotion tracking"
+    icon="percent"
+    href="/use-cases/promotion-tracking"
+  >
+    Detect strike-through prices and discounts
+  </Card>
+  <Card
+    title="Stock monitoring"
+    icon="boxes-stacked"
+    href="/use-cases/stock-monitoring"
+  >
+    Track product availability
+  </Card>
+  <Card
+    title="Digital shelf"
+    icon="ranking-star"
+    href="/use-cases/digital-shelf"
+  >
+    Measure search visibility
+  </Card>
+  <Card
+    title="Distribution monitoring"
+    icon="sitemap"
+    href="/use-cases/distribution-monitoring"
+  >
+    Map your distribution network
+  </Card>
+  <Card
+    title="Reputation monitoring"
+    icon="star"
+    href="/use-cases/reputation-monitoring"
+  >
+    Collect ratings and customer reviews
+  </Card>
+</CardGroup>
+
+## Quickstart
+
+```bash
+curl -X GET "https://api.rxradar.xyz/v1/products/gtin/0020714002527" \
+  -H "Authorization: Bearer rx_YOUR_API_KEY"
+```
+
+<Card
+  title="Get started"
+  icon="rocket"
+  href="/quickstart"
+>
+  Get your API key and make your first request
+</Card>

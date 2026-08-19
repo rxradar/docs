@@ -1,0 +1,133 @@
+---
+title: Promotion tracking
+description: "Detect strikethrough prices, discounts and special offers"
+icon: "percent"
+---
+
+## Use case
+
+Promotion tracking lets you:
+- Detect strikethrough prices and discounts
+- Track competitor promotional campaigns
+- Spot pricing trends
+
+## Implementation
+
+### 1. Detect products on promotion
+
+Use the `/v1/snapshots` endpoint to retrieve snapshots with promo data:
+
+```python
+import requests
+
+API_KEY = "rx_YOUR_API_KEY"
+EAN = "3401351277399"
+
+response = requests.get(
+    f"https://api.rxradar.xyz/v1/snapshots?gtin={EAN}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+
+data = response.json()
+
+# Filter snapshots on promotion
+promos = [s for s in data["data"] if s["price"]["original"]]
+
+for s in promos:
+    discount = ((s["price"]["original"] - s["price"]["current"]) / s["price"]["original"]) * 100
+    print(f"{s['store']}: ${s['price']['current']} (was ${s['price']['original']}) -{discount:.0f}%")
+```
+
+### 2. Analyze promotion types
+
+```python
+def analyze_promos(gtin):
+    """Analyze active promotions for a product"""
+    response = requests.get(
+        f"https://api.rxradar.xyz/v1/snapshots?gtin={gtin}",
+        headers={"Authorization": f"Bearer {API_KEY}"}
+    )
+    data = response.json()
+
+    promo_analysis = {
+        "total_stores": len(data["data"]),
+        "stores_with_promo": 0,
+        "promo_types": {},
+        "avg_discount": 0
+    }
+
+    discounts = []
+    for s in data["data"]:
+        # a product can carry several promotions at once -> promotions is a list
+        if s["promotions"]:
+            promo_analysis["stores_with_promo"] += 1
+            for promo in s["promotions"]:
+                kind = promo.get("type", "other")  # bogo / coupon / bundle / loyalty / percent_off ...
+                promo_analysis["promo_types"][kind] = promo_analysis["promo_types"].get(kind, 0) + 1
+
+        if s["price"]["original"]:
+            discount = ((s["price"]["original"] - s["price"]["current"]) / s["price"]["original"]) * 100
+            discounts.append(discount)
+
+    if discounts:
+        promo_analysis["avg_discount"] = sum(discounts) / len(discounts)
+
+    return promo_analysis
+
+# Example
+analysis = analyze_promos("3401351277399")
+print(f"Stores on promo: {analysis['stores_with_promo']}/{analysis['total_stores']}")
+print(f"Average discount: {analysis['avg_discount']:.1f}%")
+```
+
+### 3. Competitor promo alerts
+
+```python
+def promo_alerts(ean_list, min_discount=10):
+    """Alert when a competitor runs a significant promotion"""
+    alerts = []
+
+    for gtin in ean_list:
+        response = requests.get(
+            f"https://api.rxradar.xyz/v1/snapshots?gtin={gtin}",
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        data = response.json()
+
+        for s in data["data"]:
+            if s["price"]["original"]:
+                discount = ((s["price"]["original"] - s["price"]["current"]) / s["price"]["original"]) * 100
+                if discount >= min_discount:
+                    alerts.append({
+                        "gtin": gtin,
+                        "store": s["store"],
+                        "price": s["price"]["current"],
+                        "original": s["price"]["original"],
+                        "discount": f"-{discount:.0f}%",
+                        "promotions": [p["text"] for p in s["promotions"]]
+                    })
+
+    return alerts
+
+# Check promotions
+alerts = promo_alerts(["3401351277399"])
+for a in alerts:
+    print(f"🏷️ {a['store']}: ${a['price']} ({a['discount']})")
+```
+
+## Endpoints used
+
+<CardGroup cols={2}>
+  <Card
+    title="GET /v1/snapshots"
+    href="/api-reference/snapshots/list"
+  >
+    Snapshots with promo data
+  </Card>
+  <Card
+    title="GET /v1/snapshots/compare"
+    href="/api-reference/snapshots/compare"
+  >
+    Multi-store comparison
+  </Card>
+</CardGroup>

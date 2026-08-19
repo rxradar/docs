@@ -1,0 +1,141 @@
+---
+title: Distribution monitoring
+description: "Map your product distribution across the e-commerce network"
+icon: "sitemap"
+---
+
+## Use case
+
+Distribution monitoring lets you:
+- Identify where your products are sold
+- Detect new listings
+- Track network coverage
+
+## Implementation
+
+### 1. Map distribution for a product
+
+Use the `/v1/products/gtin/{gtin}` endpoint to see every store:
+
+```python
+import requests
+
+API_KEY = "rx_YOUR_API_KEY"
+EAN = "3401351277399"
+
+response = requests.get(
+    f"https://api.rxradar.xyz/v1/products/gtin/{EAN}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+
+data = response.json()
+
+print(f"Product found on {data['total']} stores:")
+for product in data["data"]:
+    print(f"  - {product['store']} ({product['network']})")
+```
+
+### 2. Coverage by network
+
+```python
+def coverage_by_network(gtin):
+    """Break down coverage by network"""
+    response = requests.get(
+        f"https://api.rxradar.xyz/v1/products/gtin/{gtin}",
+        headers={"Authorization": f"Bearer {API_KEY}"}
+    )
+    data = response.json()
+
+    networks = {}
+    for product in data["data"]:
+        network = product["network"]
+        if network not in networks:
+            networks[network] = []
+        networks[network].append(product["store"])
+
+    return networks
+
+# Example
+coverage = coverage_by_network("3401351277399")
+for network, stores in coverage.items():
+    print(f"{network}: {len(stores)} store(s)")
+    for store in stores:
+        print(f"  - {store}")
+```
+
+### 3. Detect distribution gaps
+
+```python
+def find_distribution_gaps(gtin, target_networks):
+    """Identify networks where the product is not listed"""
+    response = requests.get(
+        f"https://api.rxradar.xyz/v1/products/gtin/{gtin}",
+        headers={"Authorization": f"Bearer {API_KEY}"}
+    )
+    data = response.json()
+
+    present_networks = set(p["network"] for p in data["data"])
+    missing = [n for n in target_networks if n not in present_networks]
+
+    return {
+        "present": list(present_networks),
+        "missing": missing,
+        "coverage_rate": len(present_networks) / len(target_networks) * 100
+    }
+
+# Check coverage
+target = ["network-a", "network-b", "network-c", "network-d", "network-e"]
+gaps = find_distribution_gaps("3401351277399", target)
+print(f"Coverage: {gaps['coverage_rate']:.0f}%")
+print(f"Missing networks: {gaps['missing']}")
+```
+
+### 4. Multi-product distribution report
+
+```python
+def distribution_report(ean_list):
+    """Generate a distribution report for multiple products"""
+    import pandas as pd
+
+    results = []
+    for gtin in ean_list:
+        response = requests.get(
+            f"https://api.rxradar.xyz/v1/products/gtin/{gtin}",
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        data = response.json()
+
+        if data["data"]:
+            first = data["data"][0]
+            results.append({
+                "gtin": gtin,
+                "name": first["name"],
+                "stores_count": data["total"],
+                "networks": len(set(p["network"] for p in data["data"])),
+                "last_seen": first["last_collected_at"]
+            })
+
+    return pd.DataFrame(results)
+
+# Example
+eans = ["3401351277399", "3540550014944"]
+report = distribution_report(eans)
+print(report)
+```
+
+## Endpoints used
+
+<CardGroup cols={2}>
+  <Card
+    title="GET /v1/products/gtin/{gtin}"
+    href="/api-reference/products/by-gtin"
+  >
+    Products by EAN
+  </Card>
+  <Card
+    title="GET /v1/networks"
+    href="/api-reference/networks/list"
+  >
+    List of networks
+  </Card>
+</CardGroup>

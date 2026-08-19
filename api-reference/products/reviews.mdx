@@ -1,0 +1,63 @@
+---
+title: "List Product Reviews"
+api: "GET /v1/products/{product_id}/reviews"
+description: "Customer reviews for a product"
+---
+
+<ParamField path="product_id" type="integer" required>
+  Product ID
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="50">
+  Results per page (max: 100)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.rxradar.xyz/v1/products/29/reviews" \
+  -H "Authorization: Bearer rx_YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "product_id": 29,
+  "rating": 4.6,
+  "data": [
+    {
+      "id": 412,
+      "external_id": "rev-998812",
+      "rating": 5,
+      "title": "Very effective for tired legs",
+      "content": "I use this gel after long days on my feet — instant cool relief.",
+      "author": "Maya L.",
+      "published_at": "2026-04-22T08:14:00",
+      "experience_date": "2026-04-18",
+      "locale": "en-US",
+      "verified": true,
+      "recommended": true,
+      "helpful_count": 12,
+      "media": {
+        "images": ["https://cdn.cvs.com/reviews/rev-998812-1.jpg"],
+        "videos": []
+      },
+      "response": {
+        "text": "Thanks Maya — glad it helped!",
+        "at": "2026-04-23T10:02:00",
+        "by": "BrandX Customer Care"
+      },
+      "source": null
+    }
+  ],
+  "total": 28,
+  "page": 1,
+  "per_page": 50,
+  "pages": 1
+}
+```
+</ResponseExample>

@@ -1,0 +1,122 @@
+---
+title: Digital shelf
+description: "Measure your product visibility in category listings"
+icon: "ranking-star"
+---
+
+## Use case
+
+Digital shelf tracking lets you:
+- Track per-category shelf position
+- Analyze visibility across the categories a product appears in
+- Optimize e-commerce SEO
+
+## Implementation
+
+### 1. Analyze per-category positions
+
+Each snapshot carries a `positions` array — one entry per category the product appears in, with its rank on that category's listing. Use the `/v1/snapshots` endpoint:
+
+```python
+import requests
+
+API_KEY = "rx_YOUR_API_KEY"
+EAN = "3401351277399"
+
+response = requests.get(
+    f"https://api.rxradar.xyz/v1/snapshots?gtin={EAN}",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+
+data = response.json()
+
+# Inspect every per-category position
+for s in data["data"]:
+    for pos in s["positions"]:
+        print(f"{s['network']} · {pos['category']}: rank {pos['rank']} (page {pos['page']})")
+```
+
+### 2. Visibility report
+
+```python
+def visibility_report(gtin):
+    """Per-category visibility for a product."""
+    response = requests.get(
+        f"https://api.rxradar.xyz/v1/snapshots?gtin={gtin}",
+        headers={"Authorization": f"Bearer {API_KEY}"}
+    )
+    data = response.json()
+
+    # Flatten every (network, category) position across the snapshots.
+    positions = [
+        {**pos, "network": s["network"]}
+        for s in data["data"]
+        for pos in s["positions"]
+    ]
+
+    report = {
+        "categories_tracked": len(positions),
+        "first_page": sum(1 for p in positions if p["page"] == 1),
+        "top_3": sum(1 for p in positions if p["rank"] <= 3),
+        "avg_position": (sum(p["rank"] for p in positions) / len(positions)) if positions else 0,
+    }
+    return report
+
+# Example
+report = visibility_report("3401351277399")
+print(f"Categories tracked: {report['categories_tracked']}")
+print(f"On first page: {report['first_page']}")
+print(f"Top 3: {report['top_3']}")
+print(f"Average position: {report['avg_position']:.1f}")
+```
+
+### 3. Compare against competitors
+
+```python
+def compare_visibility(ean_list):
+    """Compare per-category visibility across multiple products"""
+    import pandas as pd
+
+    results = []
+    for gtin in ean_list:
+        response = requests.get(
+            f"https://api.rxradar.xyz/v1/snapshots?gtin={gtin}",
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        data = response.json()
+
+        positions = [pos for s in data["data"] for pos in s["positions"]]
+        ranks = [p["rank"] for p in positions]
+        first_page = sum(1 for p in positions if p["page"] == 1)
+
+        results.append({
+            "gtin": gtin,
+            "avg_position": sum(ranks) / len(ranks) if ranks else None,
+            "first_page_count": first_page,
+            "categories_tracked": len(positions),
+        })
+
+    return pd.DataFrame(results)
+
+# Compare your products vs competitors
+eans = ["3401351277399", "3540550014944"]
+comparison = compare_visibility(eans)
+print(comparison)
+```
+
+## Endpoints used
+
+<CardGroup cols={2}>
+  <Card
+    title="GET /v1/snapshots"
+    href="/api-reference/snapshots/list"
+  >
+    Snapshots with per-category positions
+  </Card>
+  <Card
+    title="GET /v1/products/{id}/snapshots"
+    href="/api-reference/products/snapshots"
+  >
+    Position history
+  </Card>
+</CardGroup>

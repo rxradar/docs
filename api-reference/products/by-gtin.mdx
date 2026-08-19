@@ -1,0 +1,80 @@
+---
+title: "List Products by GTIN"
+api: "GET /v1/products/gtin/{gtin}"
+description: "Find all products matching a GTIN (EAN-13 / UPC-12 / GTIN-14)"
+---
+
+<ParamField path="gtin" type="string" required>
+  GTIN (EAN-13 / UPC-12 / GTIN-14, normalized to GTIN-14).
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="50">
+  Results per page (max: 100)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.rxradar.xyz/v1/products/gtin/0020714002527" \
+  -H "Authorization: Bearer rx_YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "gtin": "0020714002527",
+  "data": [
+    {
+      "id": 12345,
+      "gtin": "0020714002527",
+      "code_alt": null,
+      "brand": {
+        "name": "Clinique",
+        "url": "https://www.cvs.com/shop/clinique",
+        "canonical": { "name": "Clinique", "slug": "clinique" }
+      },
+      "line": {
+        "name": "Take The Day Off",
+        "url": "https://www.cvs.com/shop/clinique/take-the-day-off"
+      },
+      "name": "Take The Day Off Cleansing Balm 125 ml",
+      "description": "Silky cleansing balm that melts away long-wear makeup, sunscreen and impurities.",
+      "currency": "USD",
+      "url": "https://www.cvs.com/clinique-take-the-day-off-cleansing-balm-125ml",
+      "size": {
+        "value": "125",
+        "unit": "ml"
+      },
+      "packaging": "Jar of 125 ml",
+      "images": {
+        "main": "https://cdn.cvs.com/clinique-take-the-day-off.jpg",
+        "gallery": [
+          "https://cdn.cvs.com/clinique-take-the-day-off-2.jpg",
+          "https://cdn.cvs.com/clinique-take-the-day-off-3.jpg"
+        ]
+      },
+      "has_gtin": true,
+      "has_variants": false,
+      "has_reviews": true,
+      "indexed_at": "2026-04-28T19:43:04",
+      "last_collected_at": "2026-04-29T17:34:54",
+      "network": "cvs",
+      "store": "cvs.com",
+      "latest": {
+        "price": 34.00,
+        "in_stock": true,
+        "rating": 4.5
+      }
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "per_page": 50,
+  "pages": 1
+}
+```
+</ResponseExample>

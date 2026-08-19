@@ -1,0 +1,163 @@
+---
+title: Reputation monitoring
+description: "Collect and analyze customer ratings and reviews"
+icon: "star"
+---
+
+## Use case
+
+Reputation monitoring lets you:
+- Track customer ratings and reviews
+- Analyze sentiment per store
+- Detect quality issues early
+
+## Implementation
+
+### 1. Fetch product reviews
+
+Use the `/v1/products/{id}/reviews` endpoint:
+
+```python
+import requests
+
+API_KEY = "rx_YOUR_API_KEY"
+PRODUCT_ID = 29
+
+response = requests.get(
+    f"https://api.rxradar.xyz/v1/products/{PRODUCT_ID}/reviews",
+    headers={"Authorization": f"Bearer {API_KEY}"}
+)
+
+data = response.json()
+
+print(f"Average rating: {data.get('rating', 'N/A')}")
+print(f"Total reviews: {data['total']}")
+
+for review in data["data"][:5]:
+    print(f"⭐ {review['rating']}/5 - {review['title']}")
+    print(f"   {review['content'][:100]}...")
+```
+
+### 2. Sentiment analysis
+
+```python
+def analyze_reviews(product_id):
+    """Analyze reviews for a product"""
+    response = requests.get(
+        f"https://api.rxradar.xyz/v1/products/{product_id}/reviews",
+        headers={"Authorization": f"Bearer {API_KEY}"}
+    )
+    data = response.json()
+
+    analysis = {
+        "total": data["total"],
+        "avg_rating": data.get("rating"),
+        "distribution": {1: 0, 2: 0, 3: 0, 4: 0, 5: 0},
+        "positive": 0,  # 4-5 stars
+        "neutral": 0,   # 3 stars
+        "negative": 0   # 1-2 stars
+    }
+
+    for review in data["data"]:
+        rating = review["rating"]
+        analysis["distribution"][rating] = analysis["distribution"].get(rating, 0) + 1
+
+        if rating >= 4:
+            analysis["positive"] += 1
+        elif rating == 3:
+            analysis["neutral"] += 1
+        else:
+            analysis["negative"] += 1
+
+    return analysis
+
+# Example
+analysis = analyze_reviews(29)
+print(f"Positive: {analysis['positive']}")
+print(f"Neutral: {analysis['neutral']}")
+print(f"Negative: {analysis['negative']}")
+```
+
+### 3. Negative review alerts
+
+```python
+def negative_review_alerts(product_ids, min_rating=2):
+    """Alert on recent negative reviews"""
+    from datetime import datetime, timedelta
+
+    alerts = []
+    week_ago = (datetime.now() - timedelta(days=7)).isoformat()
+
+    for product_id in product_ids:
+        response = requests.get(
+            f"https://api.rxradar.xyz/v1/products/{product_id}/reviews",
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        data = response.json()
+
+        for review in data["data"]:
+            if review["rating"] <= min_rating:
+                if review["published_at"] >= week_ago:
+                    alerts.append({
+                        "product_id": product_id,
+                        "rating": review["rating"],
+                        "title": review["title"],
+                        "content": review["content"][:200],
+                        "date": review["published_at"]
+                    })
+
+    return alerts
+
+# Check alerts
+alerts = negative_review_alerts([29, 60])
+for a in alerts:
+    print(f"⚠️ {a['rating']}/5 - {a['title']}")
+```
+
+### 4. Reputation comparison
+
+```python
+def compare_reputation(product_ids):
+    """Compare reputation across multiple products"""
+    import pandas as pd
+
+    results = []
+    for product_id in product_ids:
+        response = requests.get(
+            f"https://api.rxradar.xyz/v1/products/{product_id}/reviews",
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        data = response.json()
+
+        positive = sum(1 for r in data["data"] if r["rating"] >= 4)
+
+        results.append({
+            "product_id": product_id,
+            "avg_rating": data.get("rating"),
+            "total_reviews": data["total"],
+            "positive_rate": f"{(positive / data['total'] * 100):.0f}%" if data["total"] > 0 else "N/A"
+        })
+
+    return pd.DataFrame(results)
+
+# Compare your products
+comparison = compare_reputation([29, 60])
+print(comparison)
+```
+
+## Endpoints used
+
+<CardGroup cols={2}>
+  <Card
+    title="GET /v1/products/{id}/reviews"
+    href="/api-reference/products/reviews"
+  >
+    Reviews for a product
+  </Card>
+  <Card
+    title="GET /v1/products/{id}"
+    href="/api-reference/products/get"
+  >
+    Product details with rating
+  </Card>
+</CardGroup>

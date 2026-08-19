@@ -1,0 +1,121 @@
+---
+title: "List Product Variants"
+api: "GET /v1/products/{product_id}/variants"
+description: "Lists variants for a parent product"
+---
+
+<ParamField path="product_id" type="integer" required>
+  Parent product ID
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="50">
+  Results per page (max: 100)
+</ParamField>
+
+## Description
+
+Returns all variants linked to a parent product. Use this endpoint for products where `has_variants=true`.
+
+Variants can represent different sizes, colors or formats of the same product.
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.rxradar.xyz/v1/products/120918/variants" \
+  -H "Authorization: Bearer rx_YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.rxradar.xyz/v1/products/120918/variants",
+    headers={"Authorization": "Bearer rx_YOUR_API_KEY"}
+)
+
+variants = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "product_id": 120918,
+  "data": [
+    {
+      "id": 2277,
+      "gtin": "3401596868840",
+      "code_alt": null,
+      "brand": {
+        "name": "BrandX",
+        "url": "https://www.example.com/brands/brandx"
+      },
+      "line": null,
+      "name": "Sleep Aid Microgranules 60 count",
+      "description": "Plant-based dietary supplement, dissolvable granules.",
+      "currency": "USD",
+      "size": {
+        "value": "60",
+        "unit": "granules"
+      },
+      "packaging": "Tube of 60 granules",
+      "images": {
+        "main": "https://cdn.example.com/brandx-60g.jpg"
+      },
+      "has_gtin": true,
+      "is_default": true,
+      "variation": {
+        "type": "quantity",
+        "value": "60 granules"
+      },
+      "indexed_at": "2026-04-28T19:43:04",
+      "last_collected_at": "2026-04-29T17:34:54",
+      "latest": {
+        "price": 25.90,
+        "in_stock": true
+      }
+    },
+    {
+      "id": 2278,
+      "gtin": "3401596868857",
+      "code_alt": null,
+      "brand": {
+        "name": "BrandX",
+        "url": "https://www.example.com/brands/brandx"
+      },
+      "line": null,
+      "name": "Sleep Aid Microgranules 30 count",
+      "description": "Trial size, 30 granules.",
+      "currency": "USD",
+      "size": {
+        "value": "30",
+        "unit": "granules"
+      },
+      "packaging": "Tube of 30 granules",
+      "images": {
+        "main": "https://cdn.example.com/brandx-30g.jpg"
+      },
+      "has_gtin": true,
+      "is_default": false,
+      "variation": {
+        "type": "quantity",
+        "value": "30 granules"
+      },
+      "indexed_at": "2026-04-28T19:43:04",
+      "last_collected_at": "2026-04-29T17:34:54",
+      "latest": {
+        "price": 14.50,
+        "in_stock": true
+      }
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "per_page": 50,
+  "pages": 1
+}
+```
+</ResponseExample>
